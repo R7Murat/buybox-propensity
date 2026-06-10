@@ -1,0 +1,72 @@
+# ============================================================
+# DATA — ASLA commit edilmez (Keepa ticari/lisansli, ayrica serving icin gereksiz)
+# ============================================================
+data/
+raw/
+*.parquet
+*.csv
+*.tsv
+*.feather
+con_KeepaExport_merged_raw.parquet
+# Istisna: Evidently icin kuratorlu, islenmis (ham degil) kucuk reference ornegi
+!monitoring/reference_sample.parquet
+
+# ============================================================
+# Terraform
+# ============================================================
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+# tfvars hassas degerler icerir (mail, ip); ornek dosya commit edilir
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+# .terraform.lock.hcl BILEREK commit edilir (provider pinning) -> ignore EDILMEZ
+
+# ============================================================
+# Secrets / kimlik bilgileri
+# ============================================================
+.env
+.env.*
+*.pem
+*.key
+*_rsa
+aws-credentials*
+credentials
+kubeconfig
+*.kubeconfig
+
+# ============================================================
+# Python
+# ============================================================
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# ============================================================
+# MLflow / deney ciktilari (lokal)
+# ============================================================
+mlruns/
+mlflow.db
+*.sqlite
+
+# ============================================================
+# OS / editor
+# ============================================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
