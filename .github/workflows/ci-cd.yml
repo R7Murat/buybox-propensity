@@ -1,0 +1,89 @@
+# .github/workflows/ci-cd.yml
+# CI/CD pipeline: test → build → push to ECR → rolling deploy to EKS.
+# Auth: OIDC keyless (no static AWS keys).
+
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  id-token: write   # required for OIDC
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: buybox-propensity-api
+  EKS_CLUSTER: buybox-propensity-eks
+
+jobs:
+  test:
+    name: Smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run smoke test
+        env:
+          MODEL_DIR: models
+        run: |
+          python -c "
+          import json, os
+          os.environ['MODEL_DIR'] = 'models'
+          from app.service import predict
+          rec = json.load(open('ornek_istek.json'))
+          out = predict(rec)
+          assert 0 < out['propensity'] <= 1, f'Bad propensity: {out[\"propensity\"]}'
+          assert out['risk_band'] in ('dusuk','orta','yuksek'), f'Bad band: {out[\"risk_band\"]}'
+          assert isinstance(out['seller_known'], bool)
+          print(f'PASS — propensity={out[\"propensity\"]}, band={out[\"risk_band\"]}')
+          "
+
+  build-and-deploy:
+    name: Build, push ECR, deploy EKS
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, push image
+        env:
+          REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $REGISTRY/$ECR_REPO:$IMAGE_TAG .
+          docker push $REGISTRY/$ECR_REPO:$IMAGE_TAG
+          echo "IMAGE=$REGISTRY/$ECR_REPO:$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --name $EKS_CLUSTER --region $AWS_REGION
+
+      - name: Deploy to EKS (rolling update)
+        run: |
+          sed -i "s|REPLACE_ME|$IMAGE|g" k8s/deployment.yaml
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl apply -f k8s/hpa.yaml
+          kubectl rollout status deployment/buybox-propensity-api --timeout=120s

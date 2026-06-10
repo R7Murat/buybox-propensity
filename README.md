@@ -57,3 +57,42 @@ _TODO — architecture diagram_
 
 ## Repository layout
 ```
+app/            FastAPI service (main, service, schema) — FrequencyEncoder pickle fix
+src/            rebuild.py — deterministic FE rebuild (raw → 54,855 rows, seed 42)
+models/         final_model.pkl (full pipeline) + model_metadata.json + seller_rate_map.pkl
+notebooks/      03_ablation_3b.ipynb, 04_tuning_shap.ipynb
+infra/          Terraform (ECR + EKS + IAM/OIDC + budget)        # TODO Phase 5
+k8s/            deployment + service + hpa                        # TODO Phase 5
+monitoring/     evidently_drift.py + reference sample            # TODO Phase 5
+.github/        CI/CD workflow (OIDC keyless)                     # TODO Phase 5
+```
+
+## Quickstart (local)
+```bash
+# With Docker
+docker build -t buybox-propensity:local .
+docker run -p 8000:8000 buybox-propensity:local
+curl -X POST localhost:8000/predict -H "Content-Type: application/json" -d @ornek_istek.json
+
+# Without Docker (local Python)
+pip install -r requirements.txt
+uvicorn app.main:app --reload   # /health, /predict
+```
+
+## Cloud / IaC operations (Phase 5)
+- **Registry:** Amazon ECR · **Host:** EKS · **CI/CD:** GitHub Actions with keyless OIDC to AWS
+  (no static keys) · **IaC:** Terraform with S3 + DynamoDB remote state.
+- **Cost-aware:** public subnets (no NAT), small node group, AWS Budgets alert at 10 USD,
+  `terraform destroy` + orphan-resource check after the demo.
+
+_TODO — run order (terraform apply → CI/CD → Evidently → destroy) + cost runbook_
+
+## Monitoring
+Evidently tracks **input + prediction drift**. Labels are delayed, so live accuracy is not
+monitored; when a drift threshold is exceeded → alert → retrain trigger. _TODO — details._
+
+## Data
+The raw data (Keepa export) is **NOT in this repository** — it is commercial/licensed and not
+needed for serving. The source/schema are documented; to rebuild the features see
+[`src/rebuild.py`](src/rebuild.py). The Evidently reference sample is produced from processed
+features (not raw).
