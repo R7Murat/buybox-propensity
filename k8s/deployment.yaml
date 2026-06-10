@@ -1,0 +1,62 @@
+# k8s/deployment.yaml
+# Buy Box Propensity API — EKS deployment with health probes and rolling update.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: buybox-propensity-api
+  labels:
+    app: buybox-propensity-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: buybox-propensity-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0          # zero-downtime: new pod ready before old is killed
+  template:
+    metadata:
+      labels:
+        app: buybox-propensity-api
+    spec:
+      containers:
+        - name: api
+          # Image placeholder — CI/CD replaces this with the actual ECR URL + git SHA tag.
+          image: REPLACE_ME
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: MODEL_DIR
+              value: /app/models
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          # Startup probe: model + SHAP explainer load can take a few seconds on cold start.
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 3
+            failureThreshold: 10   # up to 35s for cold start (5 + 10*3)
+          # Liveness: restart if the process hangs.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 15
+            failureThreshold: 3
+          # Readiness: remove from service if temporarily unhealthy.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 5
+            failureThreshold: 3

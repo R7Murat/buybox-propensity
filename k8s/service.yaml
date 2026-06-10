@@ -1,0 +1,19 @@
+# k8s/service.yaml
+# Exposes the API via a Network Load Balancer (NLB) during the demo window.
+# Cost: ~$0.02/hr — pennies for a few hours, strong "real cloud URL" portfolio signal.
+# Alternative: change type to ClusterIP and use `kubectl port-forward` for zero NLB cost.
+apiVersion: v1
+kind: Service
+metadata:
+  name: buybox-propensity-api
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer
+  selector:
+    app: buybox-propensity-api
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP

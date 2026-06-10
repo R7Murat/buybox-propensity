@@ -1,0 +1,34 @@
+# k8s/hpa.yaml
+# Horizontal Pod Autoscaler — scales pods based on CPU utilization.
+# Demo scenario: send load → watch pods scale from 1 to 3 → screenshot for portfolio.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: buybox-propensity-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: buybox-propensity-api
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60    # scale out when avg CPU > 60%
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 30
+    scaleDown:
+      stabilizationWindowSeconds: 120   # wait 2 min before scaling in (avoid flapping)
+      policies:
+        - type: Pods
+          value: 1
+          periodSeconds: 60
