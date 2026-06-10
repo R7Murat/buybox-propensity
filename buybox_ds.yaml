@@ -64,7 +64,7 @@ faz5_kilitli_kararlar:
   host: "EKS (health check + HPA + rolling); README framing -> prod Lambda tercih edilirdi, K8s orchestration gostermek icin"
   cicd: "GitHub Actions, AWS'ye OIDC ile KEYLESS (statik key yok)"
   iac: "Terraform; infra <-> app ayri pipeline; S3 + DynamoDB remote state"
-  region: ca-central-1
+  region: us-east-1
   compute: "managed node group, t3.medium, min1/desired1/max3"
   network: "public subnet + IGW (NAT yok, cost); EKS endpoint public + CIDR-kisitli"
   serving_expose: "kubectl port-forward (ucuz) veya kisa sureli NLB (demo penceresi, guclu cloud kaniti)"

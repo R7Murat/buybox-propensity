@@ -17,7 +17,7 @@ github_repo = "R7Murat/buybox-propensity"
 allowed_api_cidr = "YOUR.PUBLIC.IP/32"
 
 # --- Asagidakilerin variables.tf'te default'u var; override etmek istersen ac ---
-# aws_region         = "ca-central-1"
+# aws_region         = "us-east-1"
 # node_instance_type = "t3.medium"
 # node_min_size      = 1
 # node_desired_size  = 1
