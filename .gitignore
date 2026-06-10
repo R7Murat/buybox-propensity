@@ -1,5 +1,5 @@
 # ============================================================
-# DATA — ASLA commit edilmez (Keepa ticari/lisansli, ayrica serving icin gereksiz)
+# DATA — never commit (Keepa data is commercial/licensed; not needed for serving)
 # ============================================================
 data/
 raw/
@@ -8,7 +8,7 @@ raw/
 *.tsv
 *.feather
 con_KeepaExport_merged_raw.parquet
-# Istisna: Evidently icin kuratorlu, islenmis (ham degil) kucuk reference ornegi
+# Exception: small curated, processed (not raw) reference sample for Evidently
 !monitoring/reference_sample.parquet
 
 # ============================================================
@@ -19,7 +19,7 @@ con_KeepaExport_merged_raw.parquet
 *.tfstate.*
 crash.log
 crash.*.log
-# tfvars hassas degerler icerir (mail, ip); ornek dosya commit edilir
+# tfvars holds sensitive values (email, IP); the example file is committed
 *.tfvars
 !*.tfvars.example
 override.tf
@@ -28,10 +28,10 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
-# .terraform.lock.hcl BILEREK commit edilir (provider pinning) -> ignore EDILMEZ
+# .terraform.lock.hcl is intentionally committed (provider pinning) -> NOT ignored
 
 # ============================================================
-# Secrets / kimlik bilgileri
+# Secrets / credentials
 # ============================================================
 .env
 .env.*
@@ -56,7 +56,7 @@ env/
 .ipynb_checkpoints/
 
 # ============================================================
-# MLflow / deney ciktilari (lokal)
+# MLflow / local experiment outputs
 # ============================================================
 mlruns/
 mlflow.db
