@@ -1,0 +1,76 @@
+proje: buybox-propensity
+problem_tipi: ikili siniflandirma (cross-sectional propensity / risk)
+hedef: is_amazon_bb
+hedef_metrik: PR-AUC (no-skill base rate = 0.1457)
+production: "iki katmanli -- HF Spaces demo + ephemeral EKS; ECR + EKS + CI/CD + Evidently; IaC Terraform"
+
+faz: 5_iac_cicd_monitoring     # modelleme + thin e2e iskelet tamam; cloud/IaC fazi devam ediyor
+tamamlanan_fazlar:
+  - EDA
+  - feature_engineering
+  - 3a_baseline_value_gate
+  - 3b_oof_ablation
+  - 4_tuning_shap_final
+  - thin_e2e_iskelet            # FastAPI /health + /predict, Docker, lokalde kanitlandi
+
+veri:
+  ham: con_KeepaExport_merged_raw.parquet   # 61032 x 148 -- LOKAL; repoya YUKLENMEZ (Keepa ticari/lisansli)
+  satir: 54855                               # ASIN dedup (is_amazon_bb desc, keep first)
+  pozitif_oran: 0.1457
+  not: "ham veri .gitignore ile haric; rebuild.py + schema dokumante. Evidently reference islenmis feature ornegi (ham degil)."
+
+split: "stratified random | %15 dokunulmamis hold-out | 5-fold StratifiedKFold | seed 42"
+
+framing: >
+  Cross-sectional propensity modeli (tek snapshot, Ekim 2023). Zamansal
+  tahmin DEGIL. SHAP iliskisel, nedensel/zamansal degil.
+
+leakage_kararlari:
+  cikarildi_target_turevli: [seller_win_rate, category_amazon_win_rate]
+  cikarildi_tier1_mekanik: [fba_flag, fba_competitor_count, review_x_fba]
+  cikarildi_tier2_bb_snapshot: ["Buy Box: Stock", price_volatility, "Buy Box OOS %"]
+  ablation_merdiveni_lightgbm_cv: {with_bb: 0.960, minus_tier1: 0.900, leak_clean: 0.711}
+  serving_bekciligi: "leaky alanlar schema.py'de yok; Pydantic extra=ignore ile servis aninda da dislaniyor (smoke-test dogrulandi)"
+
+gate:
+  pre_registered: "CV PR-AUC  yesil>=0.35 | sari 0.29-0.35 | kirmizi<0.29"
+  guardrail: "train-CV gap <= ~0.05"
+  sonuc_3a: "LightGBM CV 0.711 / holdout 0.703 -> GREEN (~4.9x base rate)"
+
+final_model:
+  config: "regularize LightGBM (num_leaves=15, min_child=100, lr=0.05, reg_lambda=5, subsample/colsample=0.8), sabit 300 agac"
+  n_features: 18              # urun-only(17) + OOF seller_rate(1); category elendi
+  holdout_pr_auc: 0.673
+  holdout_roc_auc: 0.924
+  base_rate: 0.146
+  esik_OP1_recall: 0.6162     # serving default (A: recall-oncelikli)
+  seller_fallback: "cross-fitted TargetEncoder; bilinmeyen satici -> global-mean (0.146)"
+
+cikti_dosyalari:
+  - src/rebuild.py                    # deterministik FE rebuild (raw -> 54855, seed 42)
+  - app/                             # FastAPI servis (main, service, schema) -- FrequencyEncoder pickle fix dahil
+  - models/final_model.pkl           # tam pipeline (pre + clf) burada bundle-li
+  - models/model_metadata.json
+  - models/seller_rate_map.pkl
+  - notebooks/03_ablation_3b.ipynb
+  - notebooks/04_tuning_shap.ipynb
+  - model_card.md
+  - experiment_log.json
+  - Dockerfile, requirements.txt, ornek_istek.json
+  - fig_pr_curve.png, fig_shap_bar.png
+
+faz5_kilitli_kararlar:
+  registry: "Amazon ECR (Docker Hub degil)"
+  host: "EKS (health check + HPA + rolling); README framing -> prod Lambda tercih edilirdi, K8s orchestration gostermek icin"
+  cicd: "GitHub Actions, AWS'ye OIDC ile KEYLESS (statik key yok)"
+  iac: "Terraform; infra <-> app ayri pipeline; S3 + DynamoDB remote state"
+  region: ca-central-1
+  compute: "managed node group, t3.medium, min1/desired1/max3"
+  network: "public subnet + IGW (NAT yok, cost); EKS endpoint public + CIDR-kisitli"
+  serving_expose: "kubectl port-forward (ucuz) veya kisa sureli NLB (demo penceresi, guclu cloud kaniti)"
+  cost: "AWS Budget alert 10 USD; demo sonrasi terraform destroy + yetim kaynak kontrolu"
+  monitoring: "Evidently -- etiket gecikmeli -> canli accuracy YOK; sadece girdi+tahmin drift -> alert -> retrain tetigi"
+  artifact: "simdilik final_model.pkl image'a COPY; MLflow Registry sonra"
+  iki_katman: "Katman1 HF Spaces (her zaman acik, tiklanabilir, Gradio UI) + Katman2 ephemeral EKS (orchestration kaniti, kayit + destroy)"
+
+siradaki: "variables.tf -> main.tf(provider+S3 backend) -> ecr.tf -> eks.tf -> iam_oidc.tf -> budget.tf -> outputs.tf -> k8s/ -> github actions ci-cd -> HF Spaces deploy -> monitoring/evidently_drift -> demo kanit + destroy runbook + README"

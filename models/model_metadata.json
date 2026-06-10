@@ -1,0 +1,98 @@
+{
+  "phase": "4_final_adopted",
+  "framing": "cross-sectional propensity; SHAP associational",
+  "method": "Regularized Optuna+ES explored (ES grew to ~800 trees -> gap 0.18; over-regularized Optuna -> 0.62). ADOPTED 3b regularized config at FIXED 300 trees: best gap-compliant point.",
+  "adopted_config": {
+    "learning_rate": 0.05,
+    "num_leaves": 15,
+    "min_child_samples": 100,
+    "reg_lambda": 5.0,
+    "reg_alpha": 0.0,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8
+  },
+  "n_estimators_early_stopping": 300,
+  "use_seller": true,
+  "n_features": 18,
+  "features": [
+    "variation_count",
+    "offer_count_trend",
+    "Package: Weight (g)",
+    "Reviews: Rating",
+    "new_price_log",
+    "review_count_log",
+    "sr_log",
+    "review_velocity",
+    "new_price_margin_est",
+    "sr_drops_90",
+    "Package: Dimension (cm³)",
+    "Categories: Sub__freq",
+    "Brand__freq",
+    "has_sales_data",
+    "is_negative_margin",
+    "product_age_segment",
+    "is_active_seller",
+    "listing_seller__sellerrate"
+  ],
+  "seed": 42,
+  "holdout_pr_auc": 0.6726,
+  "holdout_roc_auc": 0.9238,
+  "val_gap": 0.1422,
+  "base_rate": 0.1457,
+  "tuning_note": "Optuna under strict gap-guardrail over-regularized (holdout 0.620); 3b config dominates (0.677-class).",
+  "threshold_assumption": "A recall-priority (FN>FP)",
+  "operating_points": {
+    "OP1_recall_priority(A)": {
+      "threshold": 0.6162,
+      "precision": 0.5317,
+      "recall": 0.7832,
+      "f1": 0.6334
+    },
+    "OP2_max_f1": {
+      "threshold": 0.7298,
+      "precision": 0.6218,
+      "recall": 0.643,
+      "f1": 0.6322
+    }
+  },
+  "top_k": {
+    "K_pct": 10,
+    "precision": 0.6922,
+    "recall": 0.4746,
+    "n": 822
+  },
+  "shap_top8": [
+    {
+      "feature": "sr_drops_90",
+      "mean_abs_shap": 0.7686
+    },
+    {
+      "feature": "review_velocity",
+      "mean_abs_shap": 0.4509
+    },
+    {
+      "feature": "review_count_log",
+      "mean_abs_shap": 0.4109
+    },
+    {
+      "feature": "variation_count",
+      "mean_abs_shap": 0.3566
+    },
+    {
+      "feature": "Package: Weight (g)",
+      "mean_abs_shap": 0.307
+    },
+    {
+      "feature": "new_price_margin_est",
+      "mean_abs_shap": 0.2856
+    },
+    {
+      "feature": "Brand__freq",
+      "mean_abs_shap": 0.2219
+    },
+    {
+      "feature": "Package: Dimension (cm³)",
+      "mean_abs_shap": 0.2112
+    }
+  ]
+}

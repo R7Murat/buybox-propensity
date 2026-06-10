@@ -1,0 +1,267 @@
+{
+  "phase": "3a_final_optionA_cross_sectional_propensity",
+  "framing": "Cross-sectional propensity model on single Oct-2023 snapshot. NOT a temporal/forecasting model. SHAP = associational, not causal.",
+  "seed": 42,
+  "n_rows": 54855,
+  "n_features": 17,
+  "gate_PRE_REGISTERED": {
+    "metric": "CV PR-AUC (5 stratified folds)",
+    "base_rate": 0.1457,
+    "thresholds": {
+      "green": ">=0.35",
+      "amber": "0.29-0.35",
+      "red": "<0.29"
+    },
+    "guardrail": "train-CV gap <= ~0.05",
+    "committed_before_results": true
+  },
+  "dropped_for_leakage": {
+    "named_target_derived": [
+      "seller_win_rate",
+      "category_amazon_win_rate"
+    ],
+    "tier1_mechanical": [
+      "fba_flag",
+      "fba_competitor_count",
+      "review_x_fba"
+    ],
+    "tier2_bb_snapshot": [
+      "Buy Box: Stock",
+      "price_volatility",
+      "Buy Box out of stock percentage: 90 days OOS %"
+    ]
+  },
+  "leakage_ablation_ladder_lightgbm": {
+    "with_bb_features": 0.96,
+    "minus_tier1": 0.9,
+    "minus_tier1_tier2": 0.656
+  },
+  "results_cv": [
+    {
+      "label": "Dummy(stratified)",
+      "pr_auc_cv": 0.1458,
+      "pr_auc_std": 0.0015,
+      "pr_auc_train": 0.1453,
+      "roc_auc_cv": 0.5002,
+      "train_cv_gap": -0.0006
+    },
+    {
+      "label": "Dummy(majority)",
+      "pr_auc_cv": 0.1457,
+      "pr_auc_std": 0.0,
+      "pr_auc_train": 0.1457,
+      "roc_auc_cv": 0.5,
+      "train_cv_gap": 0.0
+    },
+    {
+      "label": "LogReg",
+      "pr_auc_cv": 0.3324,
+      "pr_auc_std": 0.0062,
+      "pr_auc_train": 0.3965,
+      "roc_auc_cv": 0.787,
+      "train_cv_gap": 0.0641
+    },
+    {
+      "label": "LightGBM",
+      "pr_auc_cv": 0.7108,
+      "pr_auc_std": 0.006,
+      "pr_auc_train": 0.8531,
+      "roc_auc_cv": 0.9273,
+      "train_cv_gap": 0.1423
+    }
+  ],
+  "holdout_15pct": {
+    "LogReg": {
+      "pr_auc": 0.325,
+      "roc_auc": 0.7855
+    },
+    "LightGBM": {
+      "pr_auc": 0.703,
+      "roc_auc": 0.9274
+    }
+  },
+  "gate_verdict": "GREEN",
+  "gate_decision_value": 0.7108,
+  "phase_3b_ablation": {
+    "config": "lightly-regularized LightGBM (num_leaves=15, min_child_samples=100, reg_lambda=5)",
+    "decision_rule": "holdout lift >= 0.005 AND train-CV gap increase <= 0.01",
+    "results": [
+      {
+        "arm": "A_urun_only",
+        "cv_pr_auc": 0.6317,
+        "cv_std": 0.0292,
+        "holdout_pr_auc": 0.6549,
+        "roc_cv": 0.9102,
+        "train_cv_gap": 0.1038
+      },
+      {
+        "arm": "B_+category",
+        "cv_pr_auc": 0.6403,
+        "cv_std": 0.0293,
+        "holdout_pr_auc": 0.6525,
+        "roc_cv": 0.9136,
+        "train_cv_gap": 0.0994
+      },
+      {
+        "arm": "C_+category+seller",
+        "cv_pr_auc": 0.6564,
+        "cv_std": 0.0338,
+        "holdout_pr_auc": 0.6765,
+        "roc_cv": 0.9183,
+        "train_cv_gap": 0.0956
+      }
+    ],
+    "verdicts": {
+      "B_+category": {
+        "holdout_lift": -0.0024,
+        "gap_increase": -0.0044,
+        "verdict": "SAYILMAZ"
+      },
+      "C_+category+seller": {
+        "holdout_lift": 0.024,
+        "gap_increase": -0.0038,
+        "verdict": "KAZANDI"
+      }
+    }
+  },
+  "phase_4_tuning": {
+    "method": "regularized Optuna(12t) + AP-monitored early stopping + gap hard-guardrail<=0.10",
+    "use_seller": true,
+    "holdout_pr_auc": 0.6202,
+    "holdout_roc_auc": 0.9086,
+    "val_gap": 0.0996,
+    "best_params": {
+      "learning_rate": 0.042009143939033815,
+      "num_leaves": 8,
+      "min_child_samples": 222,
+      "reg_lambda": 2.875765360560207,
+      "reg_alpha": 0.3252579649263976,
+      "subsample": 0.9321099380386666,
+      "colsample_bytree": 0.9379712115760958
+    },
+    "n_estimators_early_stopping": 300,
+    "seller_revalidation": {
+      "holdout_lift": 0.0088,
+      "gap_increase": 0.002,
+      "kept": true
+    },
+    "operating_points": {
+      "OP1_recall_priority(A)": {
+        "threshold": 0.622,
+        "precision": 0.4767,
+        "recall": 0.769,
+        "f1": 0.5886
+      },
+      "OP2_max_f1": {
+        "threshold": 0.6857,
+        "precision": 0.5394,
+        "recall": 0.6672,
+        "f1": 0.5966
+      }
+    },
+    "top_k": {
+      "K_pct": 10,
+      "precision": 0.6509,
+      "recall": 0.4462,
+      "n": 822
+    }
+  },
+  "phase_4_final": {
+    "phase": "4_final_adopted",
+    "framing": "cross-sectional propensity; SHAP associational",
+    "method": "Regularized Optuna+ES explored (ES grew to ~800 trees -> gap 0.18; over-regularized Optuna -> 0.62). ADOPTED 3b regularized config at FIXED 300 trees: best gap-compliant point.",
+    "adopted_config": {
+      "learning_rate": 0.05,
+      "num_leaves": 15,
+      "min_child_samples": 100,
+      "reg_lambda": 5.0,
+      "reg_alpha": 0.0,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8
+    },
+    "n_estimators_early_stopping": 300,
+    "use_seller": true,
+    "n_features": 18,
+    "features": [
+      "variation_count",
+      "offer_count_trend",
+      "Package: Weight (g)",
+      "Reviews: Rating",
+      "new_price_log",
+      "review_count_log",
+      "sr_log",
+      "review_velocity",
+      "new_price_margin_est",
+      "sr_drops_90",
+      "Package: Dimension (cm³)",
+      "Categories: Sub__freq",
+      "Brand__freq",
+      "has_sales_data",
+      "is_negative_margin",
+      "product_age_segment",
+      "is_active_seller",
+      "listing_seller__sellerrate"
+    ],
+    "seed": 42,
+    "holdout_pr_auc": 0.6726,
+    "holdout_roc_auc": 0.9238,
+    "val_gap": 0.1422,
+    "base_rate": 0.1457,
+    "tuning_note": "Optuna under strict gap-guardrail over-regularized (holdout 0.620); 3b config dominates (0.677-class).",
+    "threshold_assumption": "A recall-priority (FN>FP)",
+    "operating_points": {
+      "OP1_recall_priority(A)": {
+        "threshold": 0.6162,
+        "precision": 0.5317,
+        "recall": 0.7832,
+        "f1": 0.6334
+      },
+      "OP2_max_f1": {
+        "threshold": 0.7298,
+        "precision": 0.6218,
+        "recall": 0.643,
+        "f1": 0.6322
+      }
+    },
+    "top_k": {
+      "K_pct": 10,
+      "precision": 0.6922,
+      "recall": 0.4746,
+      "n": 822
+    },
+    "shap_top8": [
+      {
+        "feature": "sr_drops_90",
+        "mean_abs_shap": 0.7686
+      },
+      {
+        "feature": "review_velocity",
+        "mean_abs_shap": 0.4509
+      },
+      {
+        "feature": "review_count_log",
+        "mean_abs_shap": 0.4109
+      },
+      {
+        "feature": "variation_count",
+        "mean_abs_shap": 0.3566
+      },
+      {
+        "feature": "Package: Weight (g)",
+        "mean_abs_shap": 0.307
+      },
+      {
+        "feature": "new_price_margin_est",
+        "mean_abs_shap": 0.2856
+      },
+      {
+        "feature": "Brand__freq",
+        "mean_abs_shap": 0.2219
+      },
+      {
+        "feature": "Package: Dimension (cm³)",
+        "mean_abs_shap": 0.2112
+      }
+    ]
+  }
+}

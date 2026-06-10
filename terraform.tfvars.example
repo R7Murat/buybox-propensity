@@ -1,0 +1,26 @@
+# ------------------------------------------------------------
+# Kopyala -> terraform.tfvars (terraform.tfvars .gitignore'ludur, commit edilmez)
+#   cp terraform.tfvars.example terraform.tfvars
+# Sadece default'u olmayan / hassas degerleri burada veriyoruz.
+# account_id terraform icinde aws_caller_identity ile dinamik okunur -> hardcode YOK.
+# ------------------------------------------------------------
+
+# Uyari maili (AWS Budget alert gider). default YOK.
+budget_alert_email = "you@example.com"
+
+# OIDC sub claim'i ve CI workflow'u buna sabitlenir. default YOK.
+github_repo = "R7Murat/buybox-propensity"
+
+# EKS API + guvenlik grubu erisimini kendi public IP'ine kisitla (oneri).
+# Kendi IP'in:  curl -s https://checkip.amazonaws.com
+# Demo kestirmesi olarak "0.0.0.0/0" mumkun ama kisitli onerilir.
+allowed_api_cidr = "YOUR.PUBLIC.IP/32"
+
+# --- Asagidakilerin variables.tf'te default'u var; override etmek istersen ac ---
+# aws_region         = "ca-central-1"
+# node_instance_type = "t3.medium"
+# node_min_size      = 1
+# node_desired_size  = 1
+# node_max_size      = 3
+# budget_limit_usd   = 10
+# enable_nat_gateway = false
