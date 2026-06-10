@@ -17,7 +17,7 @@ terraform {
   #   terraform init -backend-config="bucket=<your-state-bucket>"
   backend "s3" {
     key          = "buybox-propensity/terraform.tfstate"
-    region       = "ca-central-1"
+    region       = "us-east-1"
     encrypt      = true
     use_lockfile = true
   }
