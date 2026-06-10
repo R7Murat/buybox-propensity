@@ -16,9 +16,9 @@ variable "environment" {
 }
 
 variable "aws_region" {
-  description = "AWS region for all resources. Data is Canadian -> ca-central-1 by default."
+  description = "AWS region for all resources. Default AWS region for all resources."
   type        = string
-  default     = "ca-central-1"
+  default     = "us-east-1"
 }
 
 # ---------- ECR ----------
@@ -36,9 +36,9 @@ variable "eks_cluster_name" {
 }
 
 variable "eks_version" {
-  description = "Kubernetes version for the EKS control plane. Provisional; pinned against currently-supported EKS versions when eks.tf is written."
+  description = "Kubernetes version for the EKS control plane. Pinned to latest EKS-supported version (Jun 2026)."
   type        = string
-  default     = "1.31"
+  default     = "1.35"
 }
 
 variable "node_instance_type" {
