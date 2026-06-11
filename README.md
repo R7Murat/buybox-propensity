@@ -5,11 +5,11 @@ propensity that Amazon holds the Buy Box for that product. The project demonstra
 full **model-to-production** path — a leakage-clean LightGBM plus end-to-end serving
 (FastAPI), IaC, CI/CD, and monitoring.
 
-> **Status:** Phase 5 (IaC + CI/CD + Monitoring) — in progress. Sections marked `TODO`
+> **Status:** Phase 6 complete — HF Spaces live demo deployed. Full pipeline: EDA → FE → Model → FastAPI → IaC/CI-CD → Monitoring → Gradio UI. Sections marked `TODO`
 > are filled in as the pipeline is built.
 
 ## 🔗 Live demo
-- **HuggingFace Spaces:** _TODO — Gradio UI (always-on, clickable)_
+- **HuggingFace Spaces:** [▶️ Live Demo](https://huggingface.co/spaces/R7Murat/buybox-propensity) — Gradio UI (always-on, clickable)
 
 ## What this model is / is NOT
 - A **cross-sectional propensity / risk** model (single snapshot, Oct 2023; one row per ASIN).
