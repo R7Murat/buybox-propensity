@@ -1,0 +1,182 @@
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f172a; color: #f8fafc; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  h1 { text-align: center; font-size: 22px; margin-bottom: 4px; }
+  .subtitle { text-align: center; color: #94a3b8; font-size: 13px; margin-bottom: 24px; }
+  .tiers { display: flex; gap: 16px; margin-bottom: 16px; }
+  .tier { border-radius: 12px; padding: 16px; flex: 1; }
+  .tier-1 { border: 2px dashed #a855f7; flex: 0 0 280px; }
+  .tier-2 { border: 2px dashed #f97316; flex: 1; }
+  .tier-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .tier-sub { font-size: 11px; margin-bottom: 14px; opacity: 0.7; }
+  .tier-1 .tier-title { color: #a855f7; }
+  .tier-1 .tier-sub { color: #c084fc; }
+  .tier-2 .tier-title { color: #f97316; }
+  .tier-2 .tier-sub { color: #fdba74; }
+  .box { border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; }
+  .box-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .box-desc { font-size: 10px; opacity: 0.8; }
+  .gradio { background: #1e1b4b; border: 1.5px solid #7c3aed; }
+  .gradio .box-title { color: #e9d5ff; }
+  .gradio .box-desc { color: #a78bfa; }
+  .fastapi { background: #0c4a6e; border: 1.5px solid #0ea5e9; }
+  .fastapi .box-title { color: #bae6fd; }
+  .fastapi .box-desc { color: #7dd3fc; }
+  .lgbm { background: #14532d; border: 1.5px solid #22c55e; }
+  .lgbm .box-title { color: #bbf7d0; }
+  .lgbm .box-desc { color: #86efac; }
+  .user-note { text-align: center; color: #fbbf24; font-size: 11px; margin-top: 4px; }
+  .cicd { background: #1c1917; border: 1.5px solid #78716c; padding: 12px; margin-bottom: 12px; border-radius: 8px; }
+  .cicd .box-title { color: #fafaf9; text-align: center; margin-bottom: 8px; }
+  .steps { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+  .step { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .step-test { background: #166534; color: #bbf7d0; }
+  .step-build { background: #1e40af; color: #bfdbfe; }
+  .step-push { background: #7c2d12; color: #fed7aa; }
+  .step-deploy { background: #581c87; color: #e9d5ff; }
+  .step-arrow { color: #64748b; font-size: 14px; display: flex; align-items: center; }
+  .infra-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .infra-col { flex: 1; }
+  .ecr { background: #431407; border: 1.5px solid #ea580c; }
+  .ecr .box-title { color: #fed7aa; }
+  .ecr .box-desc { color: #fdba74; }
+  .eks-outer { background: #0c1221; border: 1.5px solid #3b82f6; border-radius: 8px; padding: 12px; }
+  .eks-label { color: #93c5fd; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .eks-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .node { background: #172554; border: 1px solid #60a5fa; }
+  .node .box-title { color: #bfdbfe; }
+  .node .box-desc { color: #93c5fd; }
+  .pod { background: #1e3a5f; border: 1px solid #38bdf8; }
+  .pod .box-title { color: #bae6fd; }
+  .pod .box-desc { color: #7dd3fc; }
+  .hpa { background: #312e81; border: 1px solid #818cf8; }
+  .hpa .box-title { color: #c7d2fe; }
+  .hpa .box-desc { color: #a5b4fc; }
+  .nlb { background: #3f1d0e; border: 1px solid #fb923c; }
+  .nlb .box-title { color: #fed7aa; }
+  .nlb .box-desc { color: #fdba74; }
+  .vpc { background: #022c22; border: 1.5px solid #34d399; }
+  .vpc .box-title { color: #a7f3d0; }
+  .vpc .box-desc { color: #6ee7b7; }
+  .monitor-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .evidently { background: #1a1423; border: 1.5px solid #a855f7; flex: 1; }
+  .evidently .box-title { color: #e9d5ff; }
+  .evidently .box-desc { color: #c084fc; }
+  .budget { background: #1c1108; border: 1.5px solid #eab308; flex: 1; }
+  .budget .box-title { color: #fef08a; }
+  .budget .box-desc { color: #fde047; }
+  .bottom { display: flex; gap: 10px; background: #0f172a; border: 1.5px solid #475569; border-radius: 10px; padding: 12px; }
+  .bottom .box { flex: 1; margin-bottom: 0; }
+  .terraform { background: #2d1a4e; border: 1.5px solid #7c3aed; }
+  .terraform .box-title { color: #e9d5ff; }
+  .terraform .box-desc { color: #c084fc; }
+  .github { background: #1c1917; border: 1.5px solid #78716c; }
+  .github .box-title { color: #fafaf9; }
+  .github .box-desc { color: #a8a29e; }
+  .oidc { background: #172554; border: 1.5px solid #3b82f6; }
+  .oidc .box-title { color: #bfdbfe; }
+  .oidc .box-desc { color: #93c5fd; }
+  .model-box { background: #14532d; border: 1.5px solid #22c55e; }
+  .model-box .box-title { color: #bbf7d0; }
+  .model-box .box-desc { color: #86efac; }
+  .arrow-down { text-align: center; color: #64748b; font-size: 16px; margin: 2px 0; }
+</style>
+<div class="container">
+  <h1>Buy Box Propensity — MLOps Architecture</h1>
+  <p class="subtitle">Two-Tier: Always-on Demo (HF Spaces) + Ephemeral Infrastructure Proof (AWS EKS)</p>
+
+  <div class="tiers">
+    <div class="tier tier-1">
+      <div class="tier-title">TIER 1 — HuggingFace Spaces</div>
+      <div class="tier-sub">Always-on, clickable demo</div>
+      <div class="box gradio">
+        <div class="box-title">🎨 Gradio UI</div>
+        <div class="box-desc">Input form → Predict → SHAP visualization</div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="box fastapi">
+        <div class="box-title">⚡ FastAPI</div>
+        <div class="box-desc">/health · /predict (SHAP + risk_band)</div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="box lgbm">
+        <div class="box-title">🌳 LightGBM</div>
+        <div class="box-desc">18 features · leak-clean · PR-AUC 0.673</div>
+      </div>
+      <div class="user-note">👤 User interacts here</div>
+    </div>
+
+    <div class="tier tier-2">
+      <div class="tier-title">TIER 2 — Ephemeral AWS Infrastructure (Terraform IaC)</div>
+      <div class="tier-sub">Stood up for demo → evidence captured → terraform destroy</div>
+
+      <div class="cicd">
+        <div class="box-title">⚙️ GitHub Actions CI/CD (OIDC Keyless — no static AWS keys)</div>
+        <div class="steps">
+          <div class="step step-test">✅ Smoke Test</div>
+          <div class="step-arrow">→</div>
+          <div class="step step-build">🐳 Docker Build</div>
+          <div class="step-arrow">→</div>
+          <div class="step step-push">📦 ECR Push</div>
+          <div class="step-arrow">→</div>
+          <div class="step step-deploy">☸️ EKS Rolling Deploy</div>
+        </div>
+      </div>
+
+      <div class="infra-row">
+        <div class="infra-col">
+          <div class="box ecr">
+            <div class="box-title">📦 Amazon ECR</div>
+            <div class="box-desc">IMMUTABLE tags · scan-on-push · lifecycle policy</div>
+          </div>
+          <div class="box vpc">
+            <div class="box-title">🔒 VPC</div>
+            <div class="box-desc">2 public subnets (2 AZ) · IGW egress · cost-aware design</div>
+          </div>
+        </div>
+        <div class="infra-col">
+          <div class="eks-outer">
+            <div class="eks-label">☸️ Amazon EKS (v1.35)</div>
+            <div class="eks-grid">
+              <div class="box node"><div class="box-title">Node Group</div><div class="box-desc">t3.medium · auto-scaling</div></div>
+              <div class="box hpa"><div class="box-title">📈 HPA</div><div class="box-desc">CPU-based auto-scale</div></div>
+              <div class="box pod"><div class="box-title">🐳 Pod</div><div class="box-desc">FastAPI + LightGBM · 3 probes</div></div>
+              <div class="box nlb"><div class="box-title">🌐 NLB</div><div class="box-desc">Internet-facing endpoint</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="monitor-row">
+        <div class="box evidently">
+          <div class="box-title">📊 Evidently Drift Monitor</div>
+          <div class="box-desc">Input + prediction drift → alert → retrain trigger (labels delayed — no live accuracy)</div>
+        </div>
+        <div class="box budget">
+          <div class="box-title">💰 AWS Budget Alert</div>
+          <div class="box-desc">Threshold alerts · terraform destroy after demo · orphan-resource check</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="box terraform">
+      <div class="box-title">🏗️ Terraform</div>
+      <div class="box-desc">S3 remote state (native lock)<br>6 files · 533 lines</div>
+    </div>
+    <div class="box github">
+      <div class="box-title">🐙 GitHub (public)</div>
+      <div class="box-desc">R7Murat/buybox-propensity<br>OIDC trust → keyless CI/CD</div>
+    </div>
+    <div class="box oidc">
+      <div class="box-title">🔐 IAM OIDC</div>
+      <div class="box-desc">GitHub Actions → AWS<br>No static keys anywhere</div>
+    </div>
+    <div class="box model-box">
+      <div class="box-title">🧠 Model</div>
+      <div class="box-desc">LightGBM · 18 features · leak-clean<br>PR-AUC 0.673 · ROC 0.924</div>
+    </div>
+  </div>
+</div>
