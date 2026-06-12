@@ -1,5 +1,5 @@
 # k8s/deployment.yaml
-# Buy Box Propensity API — EKS deployment with health probes and rolling update.
+# Buy Box Propensity — Gradio UI + API on EKS
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +15,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 0          # zero-downtime: new pod ready before old is killed
+      maxUnavailable: 0
   template:
     metadata:
       labels:
@@ -23,14 +23,17 @@ spec:
     spec:
       containers:
         - name: api
-          # Image placeholder — CI/CD replaces this with the actual ECR URL + git SHA tag.
           image: REPLACE_ME
           ports:
-            - containerPort: 8000
+            - containerPort: 7860
               protocol: TCP
           env:
             - name: MODEL_DIR
               value: /app/models
+            - name: GRADIO_SERVER_NAME
+              value: "0.0.0.0"
+            - name: GRADIO_SERVER_PORT
+              value: "7860"
           resources:
             requests:
               cpu: 250m
@@ -38,25 +41,22 @@ spec:
             limits:
               cpu: "1"
               memory: 1Gi
-          # Startup probe: model + SHAP explainer load can take a few seconds on cold start.
           startupProbe:
             httpGet:
-              path: /health
-              port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 3
-            failureThreshold: 10   # up to 35s for cold start (5 + 10*3)
-          # Liveness: restart if the process hangs.
+              path: /
+              port: 7860
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 12
           livenessProbe:
             httpGet:
-              path: /health
-              port: 8000
+              path: /
+              port: 7860
             periodSeconds: 15
             failureThreshold: 3
-          # Readiness: remove from service if temporarily unhealthy.
           readinessProbe:
             httpGet:
-              path: /health
-              port: 8000
+              path: /
+              port: 7860
             periodSeconds: 5
             failureThreshold: 3

@@ -1,7 +1,5 @@
 # k8s/service.yaml
-# Exposes the API via a Network Load Balancer (NLB) during the demo window.
-# Cost: ~$0.02/hr — pennies for a few hours, strong "real cloud URL" portfolio signal.
-# Alternative: change type to ClusterIP and use `kubectl port-forward` for zero NLB cost.
+# Exposes the Gradio UI via NLB during the demo window.
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,5 +13,5 @@ spec:
     app: buybox-propensity-api
   ports:
     - port: 80
-      targetPort: 8000
+      targetPort: 7860
       protocol: TCP
