@@ -1,0 +1,51 @@
+{
+  "snapshot_date_train": "2023-10-17",
+  "referral_fee_pct_fallback": 0.15,
+  "global_median": {
+    "Reviews: Rating": 4.5,
+    "New: Current": 46.67,
+    "Referral Fee %": 0.15,
+    "Sales Rank: Current": 51739.0,
+    "FBA Fees:": 7.83,
+    "Package: Weight (g)": 440.0,
+    "Package: Dimension (cm³)": 2123.0
+  },
+  "cat_median": {
+    "Sales Rank: Current": {
+      "Automotive": 976982.0,
+      "Clothing, Shoes & Accessories": 23295.0,
+      "Grocery & Gourmet Food": 442312.0,
+      "Health & Personal Care": 49279.0,
+      "Home & Kitchen": 60578.0,
+      "Industrial & Scientific": 432330.0,
+      "Tools & Home Improvement": 37486.5
+    },
+    "FBA Fees:": {
+      "Automotive": 9.46,
+      "Clothing, Shoes & Accessories": 4.58,
+      "Grocery & Gourmet Food": 8.07,
+      "Health & Personal Care": 6.345000000000001,
+      "Home & Kitchen": 8.07,
+      "Industrial & Scientific": 6.975,
+      "Tools & Home Improvement": 7.58
+    },
+    "Package: Weight (g)": {
+      "Automotive": 1380.0,
+      "Clothing, Shoes & Accessories": 68.0,
+      "Grocery & Gourmet Food": 640.0,
+      "Health & Personal Care": 179.5,
+      "Home & Kitchen": 454.0,
+      "Industrial & Scientific": 261.0,
+      "Tools & Home Improvement": 386.0
+    },
+    "Package: Dimension (cm³)": {
+      "Automotive": 5271.0,
+      "Clothing, Shoes & Accessories": 82.0,
+      "Grocery & Gourmet Food": 958.0,
+      "Health & Personal Care": 875.5,
+      "Home & Kitchen": 2884.0,
+      "Industrial & Scientific": 422.5,
+      "Tools & Home Improvement": 1147.5
+    }
+  }
+}
