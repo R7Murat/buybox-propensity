@@ -81,7 +81,7 @@ Evidently drift. Stood up during a demo window, evidence captured, then torn dow
 > *Note: serverless (Lambda) would be the production choice for a model this size; EKS here is a
 > deliberate decision to demonstrate Kubernetes orchestration.*
 
-Architecture diagram: [`docs/demo-evidence/architecture-diagram.html`](docs/demo-evidence/architecture-diagram.html)
+![Architecture](docs/demo-evidence/architecture-diagram.png)
 
 ---
 
@@ -150,13 +150,17 @@ uvicorn app.main:app --reload   # /health, /predict
 **Run order**
 
 ```
-terraform apply           # provision ECR, EKS, IAM/OIDC, budget
-git push → GitHub Actions # build image, push to ECR, deploy to EKS
-kubectl get pods,svc,hpa  # validate workload
-<swagger UI>              # validate serving
-evidently_drift.py        # generate drift report
-terraform destroy         # tear down, verify no orphans
+terraform apply             # provision ECR, EKS, IAM/OIDC, budget alert
+git push → GitHub Actions   # smoke test → build → push to ECR → rolling deploy to EKS
+kubectl get pods,svc,hpa    # validate workload and autoscaling
+<Swagger UI>                # validate serving contract end to end
+python monitoring/evidently_drift.py   # generate drift report
+terraform destroy           # tear down, verify no orphaned resources
 ```
+
+The pipeline is **test-gated**: the deploy job only runs after a smoke test asserts that the
+model loads, returns a propensity in `(0, 1]`, and emits a valid risk band. A broken model
+never reaches the cluster.
 
 ## Monitoring
 
@@ -165,9 +169,30 @@ monitored; instead, crossing a drift threshold raises an alert and triggers retr
 
 ---
 
-## Data
+## Data & reproducibility
 
-The raw data (Keepa export) is **not in this repository** — it is commercial/licensed and not
-needed for serving. The source and schema are documented; to rebuild the features see
-[`src/rebuild.py`](src/rebuild.py). The Evidently reference sample is produced from processed
-features, not raw data.
+**Source.** Keepa marketplace export for the Amazon Home & Kitchen category — a single snapshot
+(October 2023), deduplicated to 54,855 ASIN-level rows.
+
+**Why the raw data is not in this repository.** The Keepa export is commercially licensed;
+redistributing it publicly would breach that licence. It is also unnecessary for serving — the
+fitted pipeline in `models/` contains everything the API needs at inference time.
+
+**What is here instead, so the work stays verifiable:**
+
+| Artefact | What it lets you check |
+|---|---|
+| [`src/rebuild.py`](src/rebuild.py) | The full feature-engineering path, raw → modelling matrix |
+| [`notebooks/`](notebooks/) | Training and ablation runs with outputs preserved |
+| [`experiment_log.json`](experiment_log.json) | Every run, its configuration and its metrics |
+| [`models/model_metadata.json`](models/model_metadata.json) | Final feature list, hyperparameters, training config |
+| `models/fe_constants.json` | Frozen training medians used for imputation at inference |
+| [`model_card.md`](model_card.md) | Scope, limitations, operating points, reproducibility notes |
+
+**Training.** Deterministic by construction: `RANDOM_SEED = 42`, fixed deduplication rule, no
+batch statistics anywhere in the path. Runs are tracked in MLflow (SQLite backend). Given your
+own Keepa export of the same category, `rebuild.py` reproduces the modelling matrix bit for bit.
+
+**Train/serve skew.** All imputation at inference uses frozen training medians from
+`fe_constants.json` — never statistics computed from the incoming request or batch.
+
